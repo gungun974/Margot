@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: region extension without language warnings
+file: ./test/margot_test.gleam
+test_name: region_extension_without_language_warnings_test
+---
+- fr-CA.i18n.yaml: `cancel` is missing in `fr-CA`, `en` is used instead

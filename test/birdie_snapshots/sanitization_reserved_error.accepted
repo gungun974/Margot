@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: sanitization reserved error
+file: ./test/margot_test.gleam
+test_name: sanitization_reserved_error_test
+---
+- en.i18n.yaml: `auto`: would generate the function `auto_`, which is already used by margot. Rename the key

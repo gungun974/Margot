@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: wildcard any without code warnings
+file: ./test/margot_test.gleam
+test_name: wildcard_any_without_code_warnings_test
+---
+- en-[any].i18n.yaml: doesn't match any locale, there is no existing code where `any` is

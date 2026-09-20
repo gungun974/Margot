@@ -1,0 +1,43 @@
+---
+version: 2.0.2
+title: invalid yaml
+file: ./test/margot_test.gleam
+test_name: invalid_yaml_test
+---
+- syntax.i18n.yaml: line 4, column 1: Unexpected end-of-stream while parsing flow scalar
+- root_list.i18n.yaml: the file should be a map of translations, found a list
+- root_string.i18n.yaml: the file should be a map of translations, found a string
+- documents.i18n.yaml: the file should contain only one YAML document
+- keys.i18n.yaml: the key `1` is an integer, keys must be strings, quote it
+- keys.i18n.yaml: the key `1.5` is a float, keys must be strings, quote it
+- keys.i18n.yaml: a key is empty, keys must be strings
+- keys.i18n.yaml: a key is a list, keys must be strings
+- keys.i18n.yaml: a key is a map, keys must be strings
+- keys.i18n.yaml: `group`: the key `2` is an integer, keys must be strings, quote it
+- values.i18n.yaml: `empty`: the value is empty, expected a string or a map
+- values.i18n.yaml: `integer`: the value is an integer, expected a string or a map (quote it to keep it as text)
+- values.i18n.yaml: `float`: the value is a float, expected a string or a map (quote it to keep it as text)
+- values.i18n.yaml: `boolean`: the value is a boolean, expected a string or a map (quote it to keep it as text)
+- values.i18n.yaml: `list`: the value is a list, expected a string or a map (quote it to keep it as text)
+- values.i18n.yaml: `group.nested_empty`: the value is empty, expected a string or a map
+- values.i18n.yaml: `group.nested_integer`: the value is an integer, expected a string or a map (quote it to keep it as text)
+- modifiers.i18n.yaml: `string`: `(cardinal)` for making a plural, it should be a map of forms like `one` and `other`
+- modifiers.i18n.yaml: `string2`: `(cardinal=param)` for making a plural, it should be a map of forms like `one` and `other`
+- modifiers.i18n.yaml: `string3`: `(ordinal=param)` for making a plural, it should be a map of forms like `one` and `other`
+- modifiers.i18n.yaml: `empty`: the value is empty, expected a string or a map
+- modifiers.i18n.yaml: `integer`: the value is an integer, expected a string or a map (quote it to keep it as text)
+- modifiers.i18n.yaml: `unknown`: `(plural)` unknown modifier
+- modifiers.i18n.yaml: `invalid_parameter`: `Count` isn't a valid plural parameter, a name is snake case like `(cardinal=count)`
+- modifiers.i18n.yaml: `wrong`: `(wrong)` unknown modifier
+- plurals.i18n.yaml: `missing_other`: a plural needs an `other` form
+- plurals.i18n.yaml: `wrong_form.several`: isn't a plural form, expected `zero`, `one`, `two`, `few`, `many` or `other`
+- plurals.i18n.yaml: `wrong_value.one`: the value is an integer, expected a string
+- plurals.i18n.yaml: `wrong_value.other`: the value is a map, expected a string
+- plurals.i18n.yaml: `wrong_key`: the key `1` is an integer, keys must be strings, quote it
+- parameters.i18n.yaml: `invalid_name`: `{First Name}` isn't a valid parameter, a name is snake case like `{first_name}`. Use `\{` to write a brace
+- parameters.i18n.yaml: `empty_name`: `{}` isn't a valid parameter, a name is snake case like `{first_name}`. Use `\{` to write a brace
+- parameters.i18n.yaml: `unknown_type`: `{name: Bool}` has an unknown type `Bool`, expected `String`, `Int` or `Float`
+- parameters.i18n.yaml: `group.nested.invalid`: `{Name}` isn't a valid parameter, a name is snake case like `{first_name}`. Use `\{` to write a brace
+- parameters.i18n.yaml: `plural.one`: `{count: Number}` has an unknown type `Number`, expected `String`, `Int` or `Float`
+- parameters.i18n.yaml: `plural.other`: `{Count}` isn't a valid parameter, a name is snake case like `{first_name}`. Use `\{` to write a brace
+- parameters.i18n.yaml: `plural_modifier.one`: `{n: Text}` has an unknown type `Text`, expected `String`, `Int` or `Float`

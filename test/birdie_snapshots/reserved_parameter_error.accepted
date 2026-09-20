@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: reserved parameter error
+file: ./test/margot_test.gleam
+test_name: reserved_parameter_error_test
+---
+- en.i18n.yaml: `greet`: the parameter `locale_` is reserved, it is the first argument of every generated function. Rename it, for example `{language}`

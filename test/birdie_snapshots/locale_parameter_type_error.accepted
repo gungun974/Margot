@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: locale parameter type error
+file: ./test/margot_test.gleam
+test_name: locale_parameter_type_error_test
+---
+- fr.i18n.yaml: `greet`: the parameter `age` is an `Int` in `en` but a `Float` in `fr`. A parameter must have the same type in every locale, for example `{age: Int}`

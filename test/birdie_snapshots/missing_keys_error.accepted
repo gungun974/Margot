@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: missing keys error
+file: ./test/margot_test.gleam
+test_name: missing_keys_error_test
+---
+- fr.i18n.yaml: `save` doesn't exist in the default locale `en`, add it to en.i18n.yaml or remove it

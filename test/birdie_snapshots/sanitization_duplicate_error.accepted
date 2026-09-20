@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: sanitization duplicate error
+file: ./test/margot_test.gleam
+test_name: sanitization_duplicate_error_test
+---
+- en.i18n.yaml: `import` and `import_` generate the same function `import_`. Rename one of them

@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: plural parameter type error
+file: ./test/margot_test.gleam
+test_name: plural_parameter_type_error_test
+---
+- en.i18n.yaml: `apple`: the parameter `count` is used as both an `Int` and a `Float` in `en`. A parameter must have the same type everywhere, links included, for example `{count: Int}`

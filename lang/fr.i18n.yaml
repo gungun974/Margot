@@ -1,0 +1,33 @@
+home:
+  title: "Bon retour !"
+  greeting: "Bonjour {name}"
+  unread_messages:
+    one: "Vous avez {n} message non lu"
+    other: "Vous avez {n} messages non lus"
+
+buttons:
+  save: "Enregistrer"
+  cancel: "Annuler"
+  import: "Importer"
+
+profile:
+  intro: "Vous avez {age: Int} ans"
+  height: "Je mesure {height: Float}m"
+
+fields:
+  name: "je m'appelle {first_name}"
+  age: "j'ai {age} ans"
+
+introduce: "Bonjour, @:fields.name et @:fields.age"
+
+remaining_time:
+  hours_unit: "{h}h"
+  minutes_unit: "{m}min"
+  hours: "@:.hours_unit @:.minutes_unit"
+
+escaped: "Utilisez \\{name} pour afficher une accolade"
+
+ranking:
+  place(ordinal):
+    one: "{n}re place"
+    other: "{n}e place"

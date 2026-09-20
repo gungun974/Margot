@@ -1,0 +1,35 @@
+home:
+  title: "Welcome back!"
+  greeting: "Hello {name}"
+  unread_messages:
+    one: "You have {n} unread message"
+    other: "You have {n} unread messages"
+
+buttons:
+  save: "Save"
+  cancel: "Cancel"
+  import: "Import"
+
+profile:
+  intro: "You are {age: Int} years old"
+  height: "I am {height: Float}m"
+
+fields:
+  name: "my name is {first_name}"
+  age: "I am {age} years old"
+
+introduce: "Hello, @:fields.name and @:fields.age"
+
+remaining_time:
+  hours_unit: "{h}h"
+  minutes_unit: "{m}m"
+  hours: "@:.hours_unit @:.minutes_unit"
+
+escaped: "Use \\{name} to show a brace"
+
+ranking:
+  place(ordinal):
+    one: "{n}st place"
+    two: "{n}nd place"
+    few: "{n}rd place"
+    other: "{n}th place"

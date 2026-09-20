@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: relative invalid linked translation
+file: ./test/margot_test.gleam
+test_name: relative_invalid_linked_translation_test
+---
+- en.i18n.yaml: `group.invalid`: the link `@:{group.fields}` targets a group, a link must target a translation

@@ -1,0 +1,10 @@
+---
+version: 2.0.2
+title: absolute recursive linked translation
+file: ./test/margot_test.gleam
+test_name: absolute_recursive_linked_translation_test
+---
+- en.i18n.yaml: `first`: the links form a cycle: `first` → `second` → `third` → `first`
+- en.i18n.yaml: `second`: the links form a cycle: `second` → `third` → `first` → `second`
+- en.i18n.yaml: `third`: the links form a cycle: `third` → `first` → `second` → `third`
+- en.i18n.yaml: `loop`: the links form a cycle: `loop` → `loop`

@@ -1,0 +1,24 @@
+target = "erlang"
+name = "margot"
+version = "1.0.0"
+
+description = "i18n code generator using YAML files to generate type-safe Gleam code inspired by Dart slang"
+licences = ["Apache-2.0"]
+repository = { type = "github", user = "gungun974", repo = "margot" }
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+simplifile = ">= 2.7.0 and < 3.0.0"
+filepath = ">= 1.1.2 and < 2.0.0"
+polly = ">= 3.1.0 and < 4.0.0"
+argv = ">= 1.1.0 and < 2.0.0"
+gleam_erlang = ">= 1.3.0 and < 2.0.0"
+yamerl = ">= 0.10.0 and < 1.0.0"
+tom = ">= 2.1.0 and < 3.0.0"
+
+[dev_dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
+birdie = ">= 2.0.2 and < 3.0.0"
+
+[tools.margot]
+output = "build/t.gleam"

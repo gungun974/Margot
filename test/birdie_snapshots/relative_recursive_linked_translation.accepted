@@ -1,0 +1,10 @@
+---
+version: 2.0.2
+title: relative recursive linked translation
+file: ./test/margot_test.gleam
+test_name: relative_recursive_linked_translation_test
+---
+- en.i18n.yaml: `group.first`: the links form a cycle: `group.first` → `group.second` → `group.third` → `group.first`
+- en.i18n.yaml: `group.second`: the links form a cycle: `group.second` → `group.third` → `group.first` → `group.second`
+- en.i18n.yaml: `group.third`: the links form a cycle: `group.third` → `group.first` → `group.second` → `group.third`
+- en.i18n.yaml: `group.loop`: the links form a cycle: `group.loop` → `group.loop`

@@ -1,0 +1,7 @@
+---
+version: 2.0.2
+title: absolute invalid linked translation
+file: ./test/margot_test.gleam
+test_name: absolute_invalid_linked_translation_test
+---
+- en.i18n.yaml: `invalid`: the link `@:{fields}` targets a group, a link must target a translation

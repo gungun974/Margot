@@ -1,0 +1,12 @@
+---
+version: 2.0.2
+title: invalid key
+file: ./test/margot_test.gleam
+test_name: invalid_key_test
+---
+- en.i18n.yaml: `Upper`: the key `Upper` should be snake case: lowercase letters, digits and `_`, without starting with a digit
+- en.i18n.yaml: `my-key`: the key `my-key` should be snake case: lowercase letters, digits and `_`, without starting with a digit
+- en.i18n.yaml: `1st`: the key `1st` should be snake case: lowercase letters, digits and `_`, without starting with a digit
+- en.i18n.yaml: `Group`: the key `Group` should be snake case: lowercase letters, digits and `_`, without starting with a digit
+- en.i18n.yaml: `Plural`: the key `Plural` should be snake case: lowercase letters, digits and `_`, without starting with a digit
+- fr.i18n.yaml: `Upper`: the key `Upper` should be snake case: lowercase letters, digits and `_`, without starting with a digit

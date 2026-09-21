@@ -5,6 +5,18 @@ import margot/internal/locale
 
 pub type Locale {
   Locale(locale: String, content: String)
+  TomlLocale(locale: String, content: String)
+  JsonLocale(locale: String, content: String)
+  CsvLocale(locale: String, content: String)
+}
+
+fn file_name(file: Locale) -> String {
+  case file {
+    Locale(..) -> file.locale <> ".i18n.yaml"
+    TomlLocale(..) -> file.locale <> ".i18n.toml"
+    JsonLocale(..) -> file.locale <> ".i18n.json"
+    CsvLocale(..) -> file.locale <> ".i18n.csv"
+  }
 }
 
 pub fn single(file: Locale) -> String {
@@ -16,7 +28,7 @@ pub fn multi(files: List(Locale)) -> String {
     internal.prepare(
       internal.Scan(
         files: list.map(files, fn(file) {
-          locale.File(name: file.locale <> ".i18n.yaml", content: file.content)
+          locale.File(name: file_name(file), content: file.content)
         }),
       ),
     )
@@ -35,7 +47,7 @@ pub fn warnings(files: List(Locale)) -> String {
     internal.prepare(
       internal.Scan(
         files: list.map(files, fn(file) {
-          locale.File(name: file.locale <> ".i18n.yaml", content: file.content)
+          locale.File(name: file_name(file), content: file.content)
         }),
       ),
     )
@@ -58,7 +70,7 @@ pub fn prepare_error(files: List(Locale)) -> String {
     internal.prepare(
       internal.Scan(
         files: list.map(files, fn(file) {
-          locale.File(name: file.locale <> ".i18n.yaml", content: file.content)
+          locale.File(name: file_name(file), content: file.content)
         }),
       ),
     )

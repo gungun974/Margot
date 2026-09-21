@@ -1,0 +1,8 @@
+---
+version: 2.0.2
+title: duplicate locale file
+file: ./test/margot_test.gleam
+test_name: duplicate_locale_file_test
+---
+- the locale `en` is defined by more than one file (`en.i18n.toml`, `en.i18n.yaml`), keep only one
+- the locale `fr` is defined by more than one file (`fr.i18n.csv`, `fr.i18n.json`, `fr.i18n.toml`, `fr.i18n.yaml`), keep only one

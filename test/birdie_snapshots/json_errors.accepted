@@ -1,0 +1,14 @@
+---
+version: 2.0.2
+title: JSON errors
+file: ./test/margot_test.gleam
+test_name: json_error_test
+---
+- syntax.i18n.json: unexpected `}`
+- end.i18n.json: unexpected end of input
+- trailing.i18n.json: unexpected `{`
+- empty.i18n.json: unexpected end of input
+- root.i18n.json: the file should be a map of translations, found a list
+- number.i18n.json: `count`: the value is an integer, expected a string or a map (quote it to keep it as text)
+- number.i18n.json: `null`: the value is empty, expected a string or a map
+- nested.i18n.json: `group.list`: the value is a list, expected a string or a map (quote it to keep it as text)

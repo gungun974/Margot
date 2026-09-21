@@ -1,0 +1,14 @@
+---
+version: 2.0.2
+title: CSV errors
+file: ./test/margot_test.gleam
+test_name: csv_error_test
+---
+- quote.i18n.csv: line 1: unescaped quote, double it (`""`) or quote the whole field
+- closing.i18n.csv: line 1: the quote of this field is never closed
+- fields.i18n.csv: the row `title` has 3 fields, expected a key and a value (quote the value if it contains a comma)
+- single.i18n.csv: the row `title` has no value, expected a key and a value
+- duplicate.i18n.csv: the key `a` is defined twice
+- group.i18n.csv: the key `a.b` is inside `a` which is already a translation
+- translation.i18n.csv: the key `a` is both a translation and a group
+- empty.i18n.csv: the key `a..b` is empty or has an empty part

@@ -12,7 +12,7 @@ parse_string(String) ->
         throw:#yamerl_exception{errors = [First | _]} ->
             {error, map_yamerl_error(First)};
         error:_ ->
-            {error, {yaml_error, unexpected_parsing_error}}
+            {error, unexpected_parsing_error}
     end.
 
 map_yamerl_error(Error) ->
@@ -21,16 +21,16 @@ map_yamerl_error(Error) ->
             unexpected_parsing_error;
 
         #yamerl_parsing_error{text = Message, line = undefined, column = undefined} ->
-           {parsing_error, unicode:characters_to_binary(Message), {yaml_error_loc, 0, 0}};
+           {parsing_error, unicode:characters_to_binary(Message), {some, {parse_error_loc, 0, 0}}};
 
         #yamerl_parsing_error{text = Message, line = Line, column = Col} ->
-            {parsing_error, unicode:characters_to_binary(Message), {yaml_error_loc, Line, Col}};
+            {parsing_error, unicode:characters_to_binary(Message), {some, {parse_error_loc, Line, Col}}};
 
         #yamerl_invalid_option{text = undefined} ->
             unexpected_parsing_error;
 
         #yamerl_invalid_option{text = Message} ->
-            {parsing_error, unicode:characters_to_binary(Message), {yaml_error_loc, 0, 0}}
+            {parsing_error, unicode:characters_to_binary(Message), {some, {parse_error_loc, 0, 0}}}
     end.
 
 map_yamerl_docs(Documents) ->
@@ -38,7 +38,7 @@ map_yamerl_docs(Documents) ->
 
 map_yamerl_doc(Document) ->
     {yamerl_doc, RootNode} = Document,
-    {document, map_yamerl_node(RootNode)}.
+    map_yamerl_node(RootNode).
 
 map_yamerl_node(Node) ->
     case Node of

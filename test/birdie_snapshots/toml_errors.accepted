@@ -1,0 +1,15 @@
+---
+version: 2.0.2
+title: TOML errors
+file: ./test/margot_test.gleam
+test_name: toml_error_test
+---
+- syntax.i18n.toml: line 1, column 9: the string is never closed
+- duplicate.i18n.toml: line 2, column 1: the key `a` is defined twice
+- table.i18n.toml: line 3, column 1: the table is defined twice
+- date.i18n.toml: dates and times aren't supported, quote the value to keep it as text
+- float.i18n.toml: `inf` and `nan` aren't supported, quote the value to keep it as text
+- number.i18n.toml: `count`: the value is an integer, expected a string or a map (quote it to keep it as text)
+- array.i18n.toml: `list`: the value is a list, expected a string or a map (quote it to keep it as text)
+- tables.i18n.toml: arrays of tables (`[[table]]`) aren't supported, a translation is a string or a group
+- scalar.i18n.toml: line 2, column 1: the key `a` is a value, not a table

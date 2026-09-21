@@ -1,7 +1,7 @@
 import birdie
 import gleam/list
 import gleeunit
-import simulate.{Locale}
+import simulate.{CsvLocale, JsonLocale, Locale, TomlLocale}
 
 pub fn main() -> Nil {
   gleeunit.main()
@@ -41,6 +41,508 @@ buttons:
     ),
   ])
   |> birdie.snap("README example")
+}
+
+pub fn toml_example_test() {
+  simulate.multi([
+    TomlLocale(
+      locale: "en",
+      content: "
+[home]
+title = \"Welcome back!\"
+greeting = \"Hello {name}\"
+
+[home.unread_messages]
+one = \"You have {n} unread message\"
+other = \"You have {n} unread messages\"
+
+[buttons]
+save = \"Save\"
+cancel = \"Cancel\"
+",
+    ),
+    TomlLocale(
+      locale: "fr",
+      content: "
+[home]
+title = \"Bon retour !\"
+greeting = \"Bonjour {name}\"
+
+[home.unread_messages]
+one = \"Vous avez {n} message non lu\"
+other = \"Vous avez {n} messages non lus\"
+
+[buttons]
+save = \"Enregistrer\"
+cancel = \"Annuler\"
+",
+    ),
+  ])
+  |> birdie.snap("TOML example")
+}
+
+pub fn json_example_test() {
+  simulate.multi([
+    JsonLocale(
+      locale: "en",
+      content: "
+{
+  \"home\": {
+    \"title\": \"Welcome back!\",
+    \"greeting\": \"Hello {name}\",
+    \"unread_messages\": {
+      \"one\": \"You have {n} unread message\",
+      \"other\": \"You have {n} unread messages\"
+    }
+  },
+  \"buttons\": {
+    \"save\": \"Save\",
+    \"cancel\": \"Cancel\"
+  }
+}
+",
+    ),
+    JsonLocale(
+      locale: "fr",
+      content: "
+{
+  \"home\": {
+    \"title\": \"Bon retour !\",
+    \"greeting\": \"Bonjour {name}\",
+    \"unread_messages\": {
+      \"one\": \"Vous avez {n} message non lu\",
+      \"other\": \"Vous avez {n} messages non lus\"
+    }
+  },
+  \"buttons\": {
+    \"save\": \"Enregistrer\",
+    \"cancel\": \"Annuler\"
+  }
+}
+",
+    ),
+  ])
+  |> birdie.snap("JSON example")
+}
+
+pub fn csv_example_test() {
+  simulate.multi([
+    CsvLocale(
+      locale: "en",
+      content: "
+home.title,Welcome back!
+home.greeting,Hello {name}
+home.unread_messages.one,You have {n} unread message
+home.unread_messages.other,You have {n} unread messages
+buttons.save,Save
+buttons.cancel,Cancel
+",
+    ),
+    CsvLocale(
+      locale: "fr",
+      content: "
+home.title,Bon retour !
+home.greeting,Bonjour {name}
+home.unread_messages.one,Vous avez {n} message non lu
+home.unread_messages.other,Vous avez {n} messages non lus
+buttons.save,Enregistrer
+buttons.cancel,Annuler
+",
+    ),
+  ])
+  |> birdie.snap("CSV example")
+}
+
+pub fn toml_features_test() {
+  simulate.single(TomlLocale(
+    locale: "en",
+    content: "
+# A comment
+title = \"Title\" # another one
+dotted.key = \"Dotted\"
+'literal_key' = 'Literal {name}'
+\"quoted_key\" = \"Quoted\"
+multiline = \"\"\"
+Line one
+Line two\"\"\"
+
+[group.deep]
+last = \"Last\"
+first = \"First\"
+
+[group]
+inline = { one = \"one\", other = \"other\" }
+b.c = \"BC\"
+a = \"A\"
+
+[empty]
+",
+  ))
+  |> birdie.snap("TOML features")
+}
+
+pub fn toml_error_test() {
+  simulate.prepare_error([
+    TomlLocale(locale: "syntax", content: "title = \"Title\nother = 1"),
+    TomlLocale(locale: "duplicate", content: "a = \"A\"\na = \"B\""),
+    TomlLocale(locale: "table", content: "[a]\nx = \"X\"\n[a]\ny = \"Y\""),
+    TomlLocale(locale: "date", content: "since = 2024-01-01"),
+    TomlLocale(locale: "float", content: "value = inf"),
+    TomlLocale(locale: "number", content: "count = 3"),
+    TomlLocale(locale: "array", content: "list = [\"a\", \"b\"]"),
+    TomlLocale(locale: "tables", content: "[[list]]\nname = \"a\""),
+    TomlLocale(locale: "scalar", content: "a = \"A\"\n[a.b]\nc = \"C\""),
+  ])
+  |> birdie.snap("TOML errors")
+}
+
+pub fn json_error_test() {
+  simulate.prepare_error([
+    JsonLocale(locale: "syntax", content: "{\"title\": }"),
+    JsonLocale(locale: "end", content: "{\"title\": \"Title\""),
+    JsonLocale(locale: "trailing", content: "{\"title\": \"Title\"} {}"),
+    JsonLocale(locale: "empty", content: ""),
+    JsonLocale(locale: "root", content: "[\"Title\"]"),
+    JsonLocale(locale: "number", content: "{\"count\": 3, \"null\": null}"),
+    JsonLocale(locale: "nested", content: "{\"group\": {\"list\": [1, 2]}}"),
+  ])
+  |> birdie.snap("JSON errors")
+}
+
+pub fn csv_error_test() {
+  simulate.prepare_error([
+    CsvLocale(locale: "quote", content: "title,Ti\"tle"),
+    CsvLocale(locale: "closing", content: "title,\"Title"),
+    CsvLocale(locale: "fields", content: "title,Title,Other"),
+    CsvLocale(locale: "single", content: "title"),
+    CsvLocale(locale: "duplicate", content: "a,A\na,B"),
+    CsvLocale(locale: "group", content: "a,A\na.b,B"),
+    CsvLocale(locale: "translation", content: "a.b,B\na,A"),
+    CsvLocale(locale: "empty", content: "a..b,B"),
+  ])
+  |> birdie.snap("CSV errors")
+}
+
+pub fn duplicate_locale_file_test() {
+  simulate.prepare_error([
+    // The same locale in two formats
+    Locale(locale: "en", content: "title: \"Title\"\n"),
+    TomlLocale(locale: "en", content: "title = \"Title\"\n"),
+    // The same locale in every format
+    CsvLocale(locale: "fr", content: "title,Titre\n"),
+    JsonLocale(locale: "fr", content: "{\"title\": \"Titre\"}"),
+    TomlLocale(locale: "fr", content: "title = \"Titre\"\n"),
+    Locale(locale: "fr", content: "title: \"Titre\"\n"),
+    // Different locales are fine
+    JsonLocale(locale: "de", content: "{\"title\": \"Titel\"}"),
+  ])
+  |> birdie.snap("duplicate locale file")
+}
+
+pub fn every_format_is_the_same_test() {
+  let yaml =
+    simulate.multi([
+      Locale(
+        locale: "en",
+        content: "
+introduce: \"Hello, @:{fields.name} and @:{fields.age}\"
+escaped: \"Use \\\\{name} to show a brace\"
+
+home:
+  title: \"Welcome back!\"
+  greeting: \"Hello {name}\"
+  unread_messages:
+    one: \"You have {n} unread message\"
+    other: \"You have {n} unread messages\"
+
+buttons:
+  save: \"Save\"
+  cancel: \"Cancel\"
+  import: \"Import\"
+
+profile:
+  intro: \"You are {age: Int} years old\"
+  height: \"I am {height: Float}m\"
+
+fields:
+  name: \"my name is {first_name}\"
+  age: \"I am {age} years old\"
+
+remaining_time:
+  hours_unit: \"{h}h\"
+  minutes_unit: \"{m}m\"
+  hours: \"@:{.hours_unit} @:{.minutes_unit}\"
+
+ranking:
+  place(ordinal):
+    one: \"{n}st place\"
+    two: \"{n}nd place\"
+    few: \"{n}rd place\"
+    other: \"{n}th place\"
+",
+      ),
+      Locale(
+        locale: "fr",
+        content: "
+introduce: \"Bonjour, @:{fields.name} et @:{fields.age}\"
+escaped: \"Utilisez \\\\{name} pour afficher une accolade\"
+
+home:
+  title: \"Bon retour !\"
+  greeting: \"Bonjour {name}\"
+  unread_messages:
+    one: \"Vous avez {n} message non lu\"
+    other: \"Vous avez {n} messages non lus\"
+
+buttons:
+  save: \"Enregistrer\"
+  cancel: \"Annuler\"
+  import: \"Importer\"
+
+profile:
+  intro: \"Vous avez {age: Int} ans\"
+  height: \"Je mesure {height: Float}m\"
+
+fields:
+  name: \"je m'appelle {first_name}\"
+  age: \"j'ai {age} ans\"
+
+remaining_time:
+  hours_unit: \"{h}h\"
+  minutes_unit: \"{m}min\"
+  hours: \"@:{.hours_unit} @:{.minutes_unit}\"
+
+ranking:
+  place(ordinal):
+    one: \"{n}re place\"
+    other: \"{n}e place\"
+",
+      ),
+    ])
+
+  let toml =
+    simulate.multi([
+      TomlLocale(
+        locale: "en",
+        content: "
+introduce = \"Hello, @:{fields.name} and @:{fields.age}\"
+escaped = \"Use \\\\{name} to show a brace\"
+
+[home]
+title = \"Welcome back!\"
+greeting = \"Hello {name}\"
+
+[home.unread_messages]
+one = \"You have {n} unread message\"
+other = \"You have {n} unread messages\"
+
+[buttons]
+save = \"Save\"
+cancel = \"Cancel\"
+import = \"Import\"
+
+[profile]
+intro = \"You are {age: Int} years old\"
+height = \"I am {height: Float}m\"
+
+[fields]
+name = \"my name is {first_name}\"
+age = \"I am {age} years old\"
+
+[remaining_time]
+hours_unit = \"{h}h\"
+minutes_unit = \"{m}m\"
+hours = \"@:{.hours_unit} @:{.minutes_unit}\"
+
+[ranking.\"place(ordinal)\"]
+one = \"{n}st place\"
+two = \"{n}nd place\"
+few = \"{n}rd place\"
+other = \"{n}th place\"
+",
+      ),
+      TomlLocale(
+        locale: "fr",
+        content: "
+introduce = \"Bonjour, @:{fields.name} et @:{fields.age}\"
+escaped = \"Utilisez \\\\{name} pour afficher une accolade\"
+
+[home]
+title = \"Bon retour !\"
+greeting = \"Bonjour {name}\"
+
+[home.unread_messages]
+one = \"Vous avez {n} message non lu\"
+other = \"Vous avez {n} messages non lus\"
+
+[buttons]
+save = \"Enregistrer\"
+cancel = \"Annuler\"
+import = \"Importer\"
+
+[profile]
+intro = \"Vous avez {age: Int} ans\"
+height = \"Je mesure {height: Float}m\"
+
+[fields]
+name = \"je m'appelle {first_name}\"
+age = \"j'ai {age} ans\"
+
+[remaining_time]
+hours_unit = \"{h}h\"
+minutes_unit = \"{m}min\"
+hours = \"@:{.hours_unit} @:{.minutes_unit}\"
+
+[ranking.\"place(ordinal)\"]
+one = \"{n}re place\"
+other = \"{n}e place\"
+",
+      ),
+    ])
+
+  let json =
+    simulate.multi([
+      JsonLocale(
+        locale: "en",
+        content: "
+{
+  \"introduce\": \"Hello, @:{fields.name} and @:{fields.age}\",
+  \"escaped\": \"Use \\\\{name} to show a brace\",
+  \"home\": {
+    \"title\": \"Welcome back!\",
+    \"greeting\": \"Hello {name}\",
+    \"unread_messages\": {
+      \"one\": \"You have {n} unread message\",
+      \"other\": \"You have {n} unread messages\"
+    }
+  },
+  \"buttons\": {
+    \"save\": \"Save\",
+    \"cancel\": \"Cancel\",
+    \"import\": \"Import\"
+  },
+  \"profile\": {
+    \"intro\": \"You are {age: Int} years old\",
+    \"height\": \"I am {height: Float}m\"
+  },
+  \"fields\": {
+    \"name\": \"my name is {first_name}\",
+    \"age\": \"I am {age} years old\"
+  },
+  \"remaining_time\": {
+    \"hours_unit\": \"{h}h\",
+    \"minutes_unit\": \"{m}m\",
+    \"hours\": \"@:{.hours_unit} @:{.minutes_unit}\"
+  },
+  \"ranking\": {
+    \"place(ordinal)\": {
+      \"one\": \"{n}st place\",
+      \"two\": \"{n}nd place\",
+      \"few\": \"{n}rd place\",
+      \"other\": \"{n}th place\"
+    }
+  }
+}
+",
+      ),
+      JsonLocale(
+        locale: "fr",
+        content: "
+{
+  \"introduce\": \"Bonjour, @:{fields.name} et @:{fields.age}\",
+  \"escaped\": \"Utilisez \\\\{name} pour afficher une accolade\",
+  \"home\": {
+    \"title\": \"Bon retour !\",
+    \"greeting\": \"Bonjour {name}\",
+    \"unread_messages\": {
+      \"one\": \"Vous avez {n} message non lu\",
+      \"other\": \"Vous avez {n} messages non lus\"
+    }
+  },
+  \"buttons\": {
+    \"save\": \"Enregistrer\",
+    \"cancel\": \"Annuler\",
+    \"import\": \"Importer\"
+  },
+  \"profile\": {
+    \"intro\": \"Vous avez {age: Int} ans\",
+    \"height\": \"Je mesure {height: Float}m\"
+  },
+  \"fields\": {
+    \"name\": \"je m'appelle {first_name}\",
+    \"age\": \"j'ai {age} ans\"
+  },
+  \"remaining_time\": {
+    \"hours_unit\": \"{h}h\",
+    \"minutes_unit\": \"{m}min\",
+    \"hours\": \"@:{.hours_unit} @:{.minutes_unit}\"
+  },
+  \"ranking\": {
+    \"place(ordinal)\": {
+      \"one\": \"{n}re place\",
+      \"other\": \"{n}e place\"
+    }
+  }
+}
+",
+      ),
+    ])
+
+  let csv =
+    simulate.multi([
+      CsvLocale(
+        locale: "en",
+        content: "
+introduce,\"Hello, @:{fields.name} and @:{fields.age}\"
+escaped,Use \\{name} to show a brace
+home.title,Welcome back!
+home.greeting,Hello {name}
+home.unread_messages.one,You have {n} unread message
+home.unread_messages.other,You have {n} unread messages
+buttons.save,Save
+buttons.cancel,Cancel
+buttons.import,Import
+profile.intro,You are {age: Int} years old
+profile.height,I am {height: Float}m
+fields.name,my name is {first_name}
+fields.age,I am {age} years old
+remaining_time.hours_unit,{h}h
+remaining_time.minutes_unit,{m}m
+remaining_time.hours,@:{.hours_unit} @:{.minutes_unit}
+ranking.place(ordinal).one,{n}st place
+ranking.place(ordinal).two,{n}nd place
+ranking.place(ordinal).few,{n}rd place
+ranking.place(ordinal).other,{n}th place
+",
+      ),
+      CsvLocale(
+        locale: "fr",
+        content: "
+introduce,\"Bonjour, @:{fields.name} et @:{fields.age}\"
+escaped,Utilisez \\{name} pour afficher une accolade
+home.title,Bon retour !
+home.greeting,Bonjour {name}
+home.unread_messages.one,Vous avez {n} message non lu
+home.unread_messages.other,Vous avez {n} messages non lus
+buttons.save,Enregistrer
+buttons.cancel,Annuler
+buttons.import,Importer
+profile.intro,Vous avez {age: Int} ans
+profile.height,Je mesure {height: Float}m
+fields.name,je m'appelle {first_name}
+fields.age,j'ai {age} ans
+remaining_time.hours_unit,{h}h
+remaining_time.minutes_unit,{m}min
+remaining_time.hours,@:{.hours_unit} @:{.minutes_unit}
+ranking.place(ordinal).one,{n}re place
+ranking.place(ordinal).other,{n}e place
+",
+      ),
+    ])
+
+  assert yaml == toml
+  assert yaml == json
+  assert yaml == csv
 }
 
 pub fn simple_literal_test() {

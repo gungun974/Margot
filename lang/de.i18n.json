@@ -1,0 +1,35 @@
+{
+  "home": {
+    "title": "Willkommen zurück!",
+    "greeting": "Hallo {name}",
+    "unread_messages": {
+      "one": "Du hast {n} ungelesene Nachricht",
+      "other": "Du hast {n} ungelesene Nachrichten"
+    }
+  },
+  "buttons": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "import": "Importieren"
+  },
+  "profile": {
+    "intro": "Du bist {age: Int} Jahre alt",
+    "height": "Ich bin {height: Float}m groß"
+  },
+  "fields": {
+    "name": "ich heiße {first_name}",
+    "age": "ich bin {age} Jahre alt"
+  },
+  "introduce": "Hallo, @:{fields.name} und @:{fields.age}",
+  "remaining_time": {
+    "hours_unit": "{h}h",
+    "minutes_unit": "{m}min",
+    "hours": "@:{.hours_unit} @:{.minutes_unit}"
+  },
+  "escaped": "Verwende \\{name}, um eine Klammer anzuzeigen",
+  "ranking": {
+    "place(ordinal)": {
+      "other": "{n}. Platz"
+    }
+  }
+}

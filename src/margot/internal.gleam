@@ -62,14 +62,14 @@ pub fn scan(root_path: String) -> Result(Scan, List(String)) {
       [
         "the `lang` directory couldn't be read ("
         <> simplifile.describe_error(error)
-        <> "), create it next to `gleam.toml` with a `<locale>.i18n.yaml` file per language",
+        <> "), create it next to `gleam.toml` with a `<locale>.i18n.yaml` (or `.i18n.toml`, `.i18n.json`, `.i18n.csv`) file per language",
       ]
     }),
   )
 
   let #(files, errors) =
     files
-    |> list.filter(string.ends_with(_, ".i18n.yaml"))
+    |> list.filter(locale.is_locale_file)
     |> list.filter_map(fn(file) {
       case simplifile.read(filepath.join(lang_path, file)) {
         Error(error) ->
@@ -115,14 +115,16 @@ pub fn prepare(scanned: Scan) -> Result(Prepared, List(String)) {
     _ -> Error(errors |> list.reverse() |> list.flatten())
   })
 
-  use resolved <- result.try(
-    wildcard.resolve_locale_wildcards(list.reverse(raw_locales)),
-  )
+  let raw_locales = list.reverse(raw_locales)
+
+  use _ <- result.try(check.check_duplicate_files(raw_locales))
+
+  use resolved <- result.try(wildcard.resolve_locale_wildcards(raw_locales))
 
   use default_locale <- result.try(
     fallback.default_locale(resolved.locales)
     |> result.replace_error([
-      "no `<locale>.i18n.yaml` file found in `lang`, add one, for example `lang/en.i18n.yaml`",
+      "no locale file found in `lang`, add one, for example `lang/en.i18n.yaml` (or `.i18n.toml`, `.i18n.json`, `.i18n.csv`)",
     ]),
   )
 

@@ -3,7 +3,7 @@
 [![Package Version](https://img.shields.io/hexpm/v/margot)](https://hex.pm/packages/margot)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/margot/)
 
-i18n code generator using YAML files to generate type-safe Gleam code inspired by Dart [slang](https://pub.dev/packages/slang).
+i18n code generator using YAML files (or TOML, JSON, CSV) to generate type-safe Gleam code inspired by Dart [slang](https://pub.dev/packages/slang).
 
 ## Table of Contents
 
@@ -11,6 +11,7 @@ i18n code generator using YAML files to generate type-safe Gleam code inspired b
 - [CLI](#cli)
 - [Configuration](#configuration)
 - [Main Features](#main-features)
+  - [File Types](#file-types)
   - [Parameter](#parameter)
   - [Linked Translations](#linked-translations)
   - [Pluralization](#pluralization)
@@ -27,7 +28,7 @@ Add margot CLI to your project as a dev dependency
 gleam add margot --dev
 ```
 
-Create one `<locale>.i18n.yaml` file per language in a `lang` directory at the root of your project next to `gleam.toml` :
+Create one `<locale>.i18n.yaml` file per language in a `lang` directory at the root of your project next to `gleam.toml` (YAML is used here, see [File Types](#file-types) for the other types) :
 
 ```text
 ├── gleam.toml
@@ -141,6 +142,106 @@ The JavaScript file used to detect the user locale is generated next to the modu
 Personally, and this is just my opinion, I find a `t` module faster to memorize and use, but do as you please.
 
 ## Main Features
+
+### File Types
+
+margot reads one file per locale in the `lang` directory. The extension of the file gives its type : `<locale>.i18n.<extension>`.
+
+The following types are supported :
+
+| File Type | File extension |
+|-----------|----------------|
+| YAML      | `.i18n.yaml`   |
+| TOML      | `.i18n.toml`   |
+| JSON      | `.i18n.json`   |
+| CSV       | `.i18n.csv`    |
+
+Every type generates exactly the same code, the rest of this README uses YAML.
+The order of the keys in the file is the order of the generated functions.
+
+**YAML Example**
+
+You have already seen what YAML looks like.
+
+```yaml
+# lang/en.i18n.yaml
+home:
+  title: "Welcome back!"
+  greeting: "Hello {name}" # some comment
+  unread_messages:
+    one: "You have {n} unread message"
+    other: "You have {n} unread messages"
+```
+
+**TOML Example**
+
+Tables and dotted keys both work. The keys with a [modifier](#pluralization) contain parentheses, so they must be quoted.
+
+```toml
+# lang/en.i18n.toml
+[home]
+title = "Welcome back!"
+greeting = "Hello {name}" # some comment
+
+[home.unread_messages]
+one = "You have {n} unread message"
+other = "You have {n} unread messages"
+
+[ranking."place(ordinal)"]
+one = "{n}st place"
+other = "{n}th place"
+```
+
+Dates and times (`since = 2024-01-01`) are not translations, quote them if you want them as text. Arrays of tables (`[[table]]`) are not supported.
+
+**JSON Example**
+
+```json
+{
+  "home": {
+    "title": "Welcome back!",
+    "greeting": "Hello {name}",
+    "unread_messages": {
+      "one": "You have {n} unread message",
+      "other": "You have {n} unread messages"
+    }
+  }
+}
+```
+
+**CSV Example**
+
+A row is the path of the translation joined by `.` and its value.
+
+```csv
+home.title,Welcome back!
+home.greeting,Hello {name}
+home.unread_messages.one,You have {n} unread message
+home.unread_messages.other,You have {n} unread messages
+```
+
+A value containing a comma or a quote must be quoted, and `""` is a quote :
+
+```csv
+introduce,"Hello, @:{fields.name}"
+quote,"Say ""hello"""
+```
+
+A backslash is not special so `\{name}` is written as is. There are no types and no comments.
+
+**Mixing types**
+
+Every type can live in the same `lang` directory, for example `en.i18n.yaml` next to `fr.i18n.toml`.
+A locale must come from **one** file though, having `en.i18n.yaml` and `en.i18n.toml` is an **error**.
+
+```text
+├── gleam.toml
+└── lang
+    ├── en.i18n.yaml
+    ├── fr.i18n.toml
+    ├── de.i18n.json
+    └── it.i18n.csv
+```
 
 ### Parameter
 

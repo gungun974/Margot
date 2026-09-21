@@ -7,6 +7,7 @@ import gleam/result
 import gleam/string
 import margot/internal
 import margot/internal/code
+import margot/internal/locale
 import polly
 import simplifile
 import tom
@@ -208,7 +209,7 @@ fn generate() -> Nil {
 fn is_locale_file(file_type: simplifile.FileType, path: String) -> Bool {
   polly.default_filter(file_type, path)
   && case file_type {
-    simplifile.File -> string.ends_with(path, ".i18n.yaml")
+    simplifile.File -> locale.is_locale_file(path)
     _ -> True
   }
 }

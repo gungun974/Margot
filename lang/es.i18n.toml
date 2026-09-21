@@ -1,0 +1,31 @@
+introduce = "Hola, @:{fields.name} y @:{fields.age}"
+escaped = "Usa \\{name} para mostrar una llave"
+
+[home]
+title = "¡Bienvenido de nuevo!"
+greeting = "Hola {name}"
+
+[home.unread_messages]
+one = "Tienes {n} mensaje sin leer"
+other = "Tienes {n} mensajes sin leer"
+
+[buttons]
+save = "Guardar"
+cancel = "Cancelar"
+import = "Importar"
+
+[profile]
+intro = "Tienes {age: Int} años"
+height = "Mido {height: Float}m"
+
+[fields]
+name = "me llamo {first_name}"
+age = "tengo {age} años"
+
+[remaining_time]
+hours_unit = "{h}h"
+minutes_unit = "{m}min"
+hours = "@:{.hours_unit} @:{.minutes_unit}"
+
+[ranking."place(ordinal)"]
+other = "{n}.º lugar"

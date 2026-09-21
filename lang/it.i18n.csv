@@ -1,0 +1,17 @@
+home.title,Bentornato!
+home.greeting,Ciao {name}
+home.unread_messages.one,Hai {n} messaggio non letto
+home.unread_messages.other,Hai {n} messaggi non letti
+buttons.save,Salva
+buttons.cancel,Annulla
+buttons.import,Importa
+profile.intro,Hai {age: Int} anni
+profile.height,Sono alto {height: Float}m
+fields.name,mi chiamo {first_name}
+fields.age,ho {age} anni
+introduce,"Ciao, @:{fields.name} e @:{fields.age}"
+remaining_time.hours_unit,{h}h
+remaining_time.minutes_unit,{m}min
+remaining_time.hours,@:{.hours_unit} @:{.minutes_unit}
+escaped,Usa \{name} per mostrare una graffa
+ranking.place(ordinal).other,{n}º posto

@@ -7,56 +7,90 @@ import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 import margot/internal/naming
-import margot/internal/yaml
+import margot/internal/node
 
 pub type File {
   File(name: String, content: String)
 }
 
-fn describe_yaml_key(key: yaml.Node) -> String {
+fn describe_key(key: node.Node) -> String {
   case key {
-    yaml.NodeInt(value) ->
+    node.NodeInt(value) ->
       "the key `"
       <> int.to_string(value)
       <> "` is an integer, keys must be strings, quote it"
-    yaml.NodeFloat(value) ->
+    node.NodeFloat(value) ->
       "the key `"
       <> float.to_string(value)
       <> "` is a float, keys must be strings, quote it"
-    yaml.NodeBool(value) ->
+    node.NodeBool(value) ->
       "the key `"
       <> case value {
         True -> "true"
         False -> "false"
       }
       <> "` is a boolean, keys must be strings, quote it (YAML reads `yes`, `no`, `on` and `off` as booleans)"
-    _ -> "a key is " <> describe_yaml_node(key) <> ", keys must be strings"
+    _ -> "a key is " <> describe_node(key) <> ", keys must be strings"
   }
 }
 
-fn describe_yaml_node(node: yaml.Node) -> String {
-  case node {
-    yaml.NodeNil -> "empty"
-    yaml.NodeStr(_) -> "a string"
-    yaml.NodeBool(_) -> "a boolean"
-    yaml.NodeInt(_) -> "an integer"
-    yaml.NodeFloat(_) -> "a float"
-    yaml.NodeSeq(_) -> "a list"
-    yaml.NodeMap(_) -> "a map"
+fn describe_node(value: node.Node) -> String {
+  case value {
+    node.NodeNil -> "empty"
+    node.NodeStr(_) -> "a string"
+    node.NodeBool(_) -> "a boolean"
+    node.NodeInt(_) -> "an integer"
+    node.NodeFloat(_) -> "a float"
+    node.NodeSeq(_) -> "a list"
+    node.NodeMap(_) -> "a map"
   }
 }
 
-fn describe_yaml_error(error: yaml.YamlError) -> String {
+fn describe_format(format: node.Format) -> String {
+  case format {
+    node.Yaml -> "YAML"
+    node.Toml -> "TOML"
+    node.Json -> "JSON"
+    node.Csv -> "CSV"
+  }
+}
+
+fn describe_parse_error(error: node.ParseError, format: node.Format) -> String {
   case error {
-    yaml.UnexpectedParsingError -> "the file couldn't be parsed as YAML"
-    yaml.ParsingError(msg:, loc:) ->
+    node.UnexpectedParsingError ->
+      "the file couldn't be parsed as " <> describe_format(format)
+    node.MultipleDocuments -> "the file should contain only one YAML document"
+    node.ParsingError(msg:, loc: Some(loc)) ->
       "line "
       <> int.to_string(loc.line)
       <> ", column "
       <> int.to_string(loc.column)
       <> ": "
       <> msg
+    node.ParsingError(msg:, loc: None) -> msg
   }
+}
+
+const extensions = [
+  #(".i18n.yaml", node.Yaml),
+  #(".i18n.toml", node.Toml),
+  #(".i18n.json", node.Json),
+  #(".i18n.csv", node.Csv),
+]
+
+pub fn parse_file_name(name: String) -> Result(#(String, node.Format), Nil) {
+  list.find_map(extensions, fn(extension) {
+    let #(suffix, format) = extension
+
+    case string.ends_with(name, suffix) {
+      True -> Ok(#(string.remove_suffix(name, suffix), format))
+      False -> Error(Nil)
+    }
+  })
+}
+
+pub fn is_locale_file(name: String) -> Bool {
+  result.is_ok(parse_file_name(name))
 }
 
 pub type Locale {
@@ -72,31 +106,32 @@ pub fn by_path(locale: Locale) -> Dict(List(String), Translation) {
 pub fn parse_locale(file: File) -> Result(Locale, List(String)) {
   let error_prefix = file.name <> ": "
 
-  use translations <- result.try(case yaml.parse_string(file.content) {
-    Ok([]) -> Ok([])
-    Ok([yaml.Document(root: yaml.NodeNil)]) -> Ok([])
-    Ok([yaml.Document(root: yaml.NodeMap(entries))]) ->
+  use #(name, format) <- result.try(
+    parse_file_name(file.name)
+    |> result.replace_error([
+      error_prefix
+      <> "the file should end with `.i18n.yaml`, `.i18n.toml`, `.i18n.json` or `.i18n.csv`",
+    ]),
+  )
+
+  use translations <- result.try(case node.parse(format, file.content) {
+    Ok(node.NodeNil) -> Ok([])
+    Ok(node.NodeMap(entries)) ->
       case parse_entries(entries, []) {
         Ok(ok) -> Ok(ok)
         Error(errors) ->
           Error(list.map(errors, fn(error) { error_prefix <> error }))
       }
-    Ok([yaml.Document(root: root)]) ->
+    Ok(root) ->
       Error([
         error_prefix
         <> "the file should be a map of translations, found "
-        <> describe_yaml_node(root),
+        <> describe_node(root),
       ])
-    Ok(_) ->
-      Error([error_prefix <> "the file should contain only one YAML document"])
-    Error(error) -> Error([error_prefix <> describe_yaml_error(error)])
+    Error(error) -> Error([error_prefix <> describe_parse_error(error, format)])
   })
 
-  Ok(Locale(
-    name: string.remove_suffix(file.name, ".i18n.yaml"),
-    file: file.name,
-    translations:,
-  ))
+  Ok(Locale(name:, file: file.name, translations:))
 }
 
 fn split_key_and_raw_modifier(key: String) -> #(String, Result(String, Nil)) {
@@ -111,13 +146,13 @@ fn split_key_and_raw_modifier(key: String) -> #(String, Result(String, Nil)) {
 }
 
 fn parse_entries(
-  entries: List(#(yaml.Node, yaml.Node)),
+  entries: List(#(node.Node, node.Node)),
   path: List(String),
 ) -> Result(List(Translation), List(String)) {
   let #(translations, errors) =
     list.map(entries, fn(entry) {
       case entry {
-        #(yaml.NodeStr(raw_key), value) -> {
+        #(node.NodeStr(raw_key), value) -> {
           let #(key, modifier) = split_key_and_raw_modifier(raw_key)
           let path = list.append(path, [key])
 
@@ -141,14 +176,14 @@ fn parse_entries(
           }
 
           case value, modifier, is_plural {
-            yaml.NodeStr(value), Error(Nil), _ ->
+            node.NodeStr(value), Error(Nil), _ ->
               parse_translation(path, value)
               |> result.map(fn(translation) { [translation] })
               |> result.map_error(fn(error) {
                 [naming.path_error_message(error, path)]
               })
 
-            yaml.NodeStr(_), Ok(modifier), True ->
+            node.NodeStr(_), Ok(modifier), True ->
               Error([
                 naming.path_error_message(
                   "`("
@@ -158,7 +193,7 @@ fn parse_entries(
                 ),
               ])
 
-            yaml.NodeMap(children), Ok(modifier), True -> {
+            node.NodeMap(children), Ok(modifier), True -> {
               use #(kind, parameter) <- result.try(
                 parse_plural_modifier(modifier)
                 |> result.map_error(fn(error) {
@@ -170,8 +205,8 @@ fn parse_entries(
               |> result.map(fn(translation) { [translation] })
             }
 
-            yaml.NodeStr(_), Ok(modifier), _
-            | yaml.NodeMap(_), Ok(modifier), _
+            node.NodeStr(_), Ok(modifier), _
+            | node.NodeMap(_), Ok(modifier), _
             ->
               Error([
                 naming.path_error_message(
@@ -180,13 +215,13 @@ fn parse_entries(
                 ),
               ])
 
-            yaml.NodeMap(children), Error(Nil), False ->
+            node.NodeMap(children), Error(Nil), False ->
               case parse_plural(children, path, Cardinal, "n") {
                 Ok(translation) -> Ok([translation])
                 Error(_) -> parse_entries(children, path)
               }
 
-            yaml.NodeNil, _, _ ->
+            node.NodeNil, _, _ ->
               Error([
                 naming.path_error_message(
                   "the value is empty, expected a string or a map",
@@ -198,15 +233,14 @@ fn parse_entries(
               Error([
                 naming.path_error_message(
                   "the value is "
-                    <> describe_yaml_node(value)
+                    <> describe_node(value)
                     <> ", expected a string or a map (quote it to keep it as text)",
                   path,
                 ),
               ])
           }
         }
-        #(key, _) ->
-          Error([naming.path_error_message(describe_yaml_key(key), path)])
+        #(key, _) -> Error([naming.path_error_message(describe_key(key), path)])
       }
     })
     |> result.partition()
@@ -292,7 +326,7 @@ fn parse_plural_modifier(
 }
 
 fn parse_plural(
-  map: List(#(yaml.Node, yaml.Node)),
+  map: List(#(node.Node, node.Node)),
   path: List(String),
   kind: PluralKind,
   parameter: String,
@@ -301,7 +335,7 @@ fn parse_plural(
     let #(forms, errors) =
       list.map(map, fn(entry) {
         case entry {
-          #(yaml.NodeStr(key), yaml.NodeStr(value)) ->
+          #(node.NodeStr(key), node.NodeStr(value)) ->
             case key {
               "zero" -> Ok(#(Zero, key, value))
               "one" -> Ok(#(One, key, value))
@@ -315,15 +349,12 @@ fn parse_plural(
                   list.append(path, [key]),
                 ))
             }
-          #(yaml.NodeStr(key), value) ->
+          #(node.NodeStr(key), value) ->
             Error(naming.path_error_message(
-              "the value is "
-                <> describe_yaml_node(value)
-                <> ", expected a string",
+              "the value is " <> describe_node(value) <> ", expected a string",
               list.append(path, [key]),
             ))
-          #(key, _) ->
-            Error(naming.path_error_message(describe_yaml_key(key), path))
+          #(key, _) -> Error(naming.path_error_message(describe_key(key), path))
         }
       })
       |> result.partition()

@@ -7,6 +7,39 @@ import margot/internal/locale.{
 }
 import margot/internal/naming
 
+pub fn check_duplicate_files(
+  locales: List(Locale),
+) -> Result(Nil, List(String)) {
+  let errors =
+    locales
+    |> list.map(fn(locale) { locale.name })
+    |> list.unique()
+    |> list.filter_map(fn(name) {
+      let files =
+        locales
+        |> list.filter(fn(locale) { locale.name == name })
+        |> list.map(fn(locale) { "`" <> locale.file <> "`" })
+        |> list.sort(string.compare)
+
+      case files {
+        [_, _, ..] ->
+          Ok(
+            "the locale `"
+            <> name
+            <> "` is defined by more than one file ("
+            <> string.join(files, ", ")
+            <> "), keep only one",
+          )
+        _ -> Error(Nil)
+      }
+    })
+
+  case errors {
+    [] -> Ok(Nil)
+    _ -> Error(errors)
+  }
+}
+
 pub fn check_locales(
   locales: List(Locale),
   default: String,
